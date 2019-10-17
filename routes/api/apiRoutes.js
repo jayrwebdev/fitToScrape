@@ -5,7 +5,7 @@ const db = mongojs(database, collection)
 
 module.exports = (scrape) => {
     scrape.get("/All", (req, res) => {
-        db.News.find({},function(err,data){
+        db.News.find({}, (err, data) => {
             if (err) {
                 console.log(err)
                 res.sendStatus(500)
@@ -13,6 +13,17 @@ module.exports = (scrape) => {
                 res.sendStatus(200)
                 res.json(data)
             }
+        })
+    })
+    scrape.post("/comments/:id", (req, res) => {
+        db.News.create({}, (err,data) => {
+             if (err) {
+                console.log(err)
+                res.sendStatus(500)
+             } else {
+                res.sendStatus(200)
+                res.json(data)
+             }
         })
     })
 }
