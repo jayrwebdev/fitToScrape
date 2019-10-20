@@ -1,6 +1,6 @@
 var express = require("express");
 var logger = require("morgan");
-var mongoose = require("mongoose");
+var mongoose = require("mongoose")
 
 // Our scraping tools
 // Axios is a promised-based http library, similar to jQuery's Ajax method
@@ -17,7 +17,7 @@ var PORT = 3000;
 var app = express();
 
 // Configure middleware
-
+mongoose.connect('mongodb://localhost:27017/scraper', {useNewUrlParser: true});
 // Use morgan logger for logging requests
 app.use(logger("dev"));
 // Parse request body as JSON
@@ -27,7 +27,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/unit18Populater", { useNewUrlParser: true });
+
 
 // Routes
 
@@ -39,7 +39,7 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(response.data);
 
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article h2").each(function(i, element) {
+    $("article h3").each(function(i, element) {
       // Save an empty result object
       var result = {};
 
