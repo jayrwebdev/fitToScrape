@@ -17,7 +17,8 @@ var PORT = 3000;
 var app = express();
 
 // Configure middleware
-mongoose.connect('mongodb://localhost:27017/scraper', {useNewUrlParser: true});
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/27017/scraper";
+mongoose.connect(MONGODB_URI, {useNewUrlParser: true});
 // Use morgan logger for logging requests
 app.use(logger("dev"));
 // Parse request body as JSON
@@ -39,7 +40,7 @@ app.get("/scrape", function(req, res) {
     var $ = cheerio.load(response.data);
 
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article h3").each(function(i, element) {
+    $("article h2").each(function(i, element) {
       // Save an empty result object
       var result = {};
 
