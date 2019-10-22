@@ -17,7 +17,7 @@ var PORT = process.env.PORT||3000;
 var app = express();
 
 // Configure middleware
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/27017/scraper";
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/scraper";
 mongoose.connect(MONGODB_URI, {useNewUrlParser: true});
 // Use morgan logger for logging requests
 app.use(logger("dev"));
@@ -35,37 +35,40 @@ app.use(express.static("public"));
 // A GET route for scraping the echoJS website
 app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with axios
-  axios.get("http://www.echojs.com/").then(function(response) {
+  axios.get("https://www.newyorker.com/popular").then(function(response) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(response.data);
 
+    db.Article.deleteMany().then((err,data) => {
+      $("h3").each(function(i, element) {
+        console.log(element)
+        // Save an empty result object
+        var result = {};
+   
+        // Add the text and href of every link, and save them as properties of the result object
+        result.title = $(this).text();
+        result.link = "https://www.newyorker.com"+$(this)
+          .parent()
+          .attr("href");
+       
+        // Create a new Article using the `result` object built from scraping
+        db.Article.create(result)
+          .then(function(dbArticle) {
+            // View the added result in the console
+            console.log(dbArticle);
+          })
+          .catch(function(err) {
+            // If an error occurred, log it
+            console.log(err);
+          });
+      });
+  
+      // Send a message to the client
+      res.send("Scrape Complete");
+    })
+
     // Now, we grab every h2 within an article tag, and do the following:
-    $("article h2").each(function(i, element) {
-      // Save an empty result object
-      var result = {};
-
-      // Add the text and href of every link, and save them as properties of the result object
-      result.title = $(this)
-        .children("a")
-        .text();
-      result.link = $(this)
-        .children("a")
-        .attr("href");
-
-      // Create a new Article using the `result` object built from scraping
-      db.Article.create(result)
-        .then(function(dbArticle) {
-          // View the added result in the console
-          console.log(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, log it
-          console.log(err);
-        });
-    });
-
-    // Send a message to the client
-    res.send("Scrape Complete");
+    
   });
 });
 
